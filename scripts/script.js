@@ -1,7 +1,8 @@
 import { pagePaths } from "../helpers/paths.js";
 import { formSelectorsId } from "../helpers/selectors.js";
+import UNSPLASH_ACCESS_KEY from "./apikey.js";
 
-const accessKey = "YOUR_UNSPLASH_ACCESS_KEY";
+const accessKey = UNSPLASH_ACCESS_KEY;
 const gallery = document.querySelector(".gallery");
 const searchInput = document.querySelector("#searchInput");
 const searchButton = document.querySelector("#searchButton");
