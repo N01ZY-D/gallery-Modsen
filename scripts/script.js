@@ -13,6 +13,7 @@ const prevBtn = document.querySelector(".prev");
 const nextBtn = document.querySelector(".next");
 
 let images = [];
+const imageCache = {};
 let currentIndex = 0;
 
 function loadCommonComponents() {
@@ -37,29 +38,52 @@ function loadCommonComponents() {
   ]);
 }
 
-// Получение изображений из Unsplash API
-async function fetchImages() {
+// Получение изображений из Unsplash API с учетом запроса
+async function fetchImages(query = "random") {
   try {
-    const response = await fetch(
-      `https://api.unsplash.com/photos/?client_id=${accessKey}&per_page=20`
-    );
-    images = await response.json();
+    Object.keys(imageCache).forEach((key) => delete imageCache[key]);
+
+    const endpoint =
+      query === "random"
+        ? `https://api.unsplash.com/photos/random?count=12&client_id=${accessKey}`
+        : `https://api.unsplash.com/search/photos?query=${query}&client_id=${accessKey}&per_page=12`;
+
+    const response = await fetch(endpoint);
+    const data = await response.json();
+    images = query === "random" ? data : data.results;
     displayImages(images);
   } catch (error) {
     console.error("Ошибка загрузки изображений", error);
   }
 }
 
-// Отображение изображений в галерее
+function preloadImages() {
+  images.forEach((image, index) => {
+    if (!imageCache[index]) {
+      // Если изображения ещё нет в кэше
+      const img = new Image();
+      img.src = image.urls.regular;
+      img.onload = () => {
+        imageCache[index] = img; // Сохраняем загруженное изображение
+      };
+    }
+  });
+}
+
+// Отображение изображений в галерее 3x4
 function displayImages(images) {
   gallery.innerHTML = "";
+
   images.forEach((image, index) => {
     const imgElement = document.createElement("img");
     imgElement.src = image.urls.small;
     imgElement.alt = image.alt_description || "Image";
     imgElement.dataset.index = index;
+    imgElement.classList.add("gallery-item");
     gallery.appendChild(imgElement);
   });
+
+  preloadImages(); // Предзагрузка полноразмерных изображений
 }
 
 // Делегирование событий: обработка кликов по изображениям галереи
@@ -70,14 +94,10 @@ gallery.addEventListener("click", (event) => {
   }
 });
 
-// Фильтрация изображений по поиску
+// Запрос изображений по поисковому запросу
 searchButton.addEventListener("click", () => {
-  const query = searchInput.value.toLowerCase();
-  const filteredImages = images.filter(
-    (img) =>
-      img.alt_description && img.alt_description.toLowerCase().includes(query)
-  );
-  displayImages(filteredImages);
+  const query = searchInput.value.trim();
+  fetchImages(query);
 });
 
 // Открытие модального окна
@@ -85,6 +105,7 @@ function openModal(index) {
   currentIndex = index;
   updateModalImage();
   modal.classList.add("open");
+  document.body.classList.add("modal-open");
   document.body.style.overflow = "hidden";
 }
 
@@ -95,12 +116,22 @@ modal.addEventListener("click", (e) => {
 });
 function closeModalWindow() {
   modal.classList.remove("open");
+  document.body.classList.remove("modal-open");
   document.body.style.overflow = "auto";
 }
 
 // Обновление изображения в модальном окне
 function updateModalImage() {
-  modalImg.src = images[currentIndex].urls.regular;
+  if (imageCache[currentIndex]) {
+    modalImg.src = imageCache[currentIndex].src;
+  } else {
+    const img = new Image();
+    img.src = images[currentIndex].urls.full;
+    img.onload = () => {
+      imageCache[currentIndex] = img; // Кэшируем после загрузки
+      modalImg.src = img.src;
+    };
+  }
 }
 
 // Пролистывание карусели
@@ -123,4 +154,4 @@ document.addEventListener("keydown", (e) => {
 });
 
 loadCommonComponents();
-fetchImages();
+//fetchImages();
