@@ -40,7 +40,6 @@ function loadCommonComponents() {
   ]);
 }
 
-// Получение изображений из Unsplash API с учетом запроса
 async function fetchImages(query = "random") {
   try {
     Object.keys(imageCache).forEach((key) => delete imageCache[key]);
@@ -84,10 +83,9 @@ function displayImages(images) {
     elements.gallery.appendChild(imgElement);
   });
 
-  preloadImages(); // Предзагрузка полноразмерных изображений
+  preloadImages();
 }
 
-// Делегирование событий: обработка кликов по изображениям галереи
 elements.gallery.addEventListener("click", (event) => {
   const imgElement = event.target;
   if (imgElement.tagName === "IMG") {
@@ -95,10 +93,22 @@ elements.gallery.addEventListener("click", (event) => {
   }
 });
 
-// Запрос изображений по поисковому запросу
+function validateInput(input) {
+  const regex = /^[a-zA-Z0-9!$&*=^|~#%'+/{}?_ ]{3,50}$/;
+
+  if (!regex.test(input)) {
+    alert(
+      "Ввод должен содержать от 3 до 50 символов и только разрешенные символы."
+    );
+    return false;
+  }
+
+  return true;
+}
+
 elements.searchButton.addEventListener("click", () => {
   const query = elements.searchInput.value.trim();
-  if (query) {
+  if (query && validateInput(query)) {
     fetchImages(query);
   }
 });
@@ -106,13 +116,12 @@ elements.searchButton.addEventListener("click", () => {
 elements.searchInput.addEventListener("keydown", (event) => {
   if (event.key === "Enter") {
     const query = elements.searchInput.value.trim();
-    if (query) {
+    if (query && validateInput(query)) {
       fetchImages(query);
     }
   }
 });
 
-// Открытие модального окна
 function openModal(index) {
   currentIndex = index;
   updateModalImage();
@@ -127,7 +136,6 @@ function closeModalWindow() {
   document.body.style.overflow = "auto";
 }
 
-// Закрытие модального окна
 elements.closeModal.addEventListener("click", closeModalWindow);
 elements.modal.addEventListener("click", (e) => {
   if (e.target === elements.modal) closeModalWindow();
@@ -146,7 +154,6 @@ function updateModalImage() {
   }
 }
 
-// Пролистывание карусели
 elements.prevBtn.addEventListener("click", () => {
   currentIndex = (currentIndex - 1 + images.length) % images.length;
   updateModalImage();
@@ -156,7 +163,6 @@ elements.nextBtn.addEventListener("click", () => {
   updateModalImage();
 });
 
-// Обработка стрелок клавиатуры
 document.addEventListener("keydown", (e) => {
   if (elements.modal.classList.contains("open")) {
     if (e.key === "ArrowLeft") elements.prevBtn.click();
