@@ -303,6 +303,14 @@ a {
   transition: opacity 0.3s ease-in-out;
 }
 
+.modal-open {
+  overflow: hidden;
+}
+
+.modal-close {
+  overflow: auto;
+}
+
 .modal-content {
   width: 545px;
   height: 309px;

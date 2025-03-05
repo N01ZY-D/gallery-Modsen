@@ -61,11 +61,10 @@ async function fetchImages(query = "random") {
 function preloadImages() {
   images.forEach((image, index) => {
     if (!imageCache[index]) {
-      // Если изображения ещё нет в кэше
       const img = new Image();
       img.src = image.urls.regular;
       img.onload = () => {
-        imageCache[index] = img; // Сохраняем загруженное изображение
+        imageCache[index] = img;
       };
     }
   });
@@ -127,13 +126,13 @@ function openModal(index) {
   updateModalImage();
   elements.modal.classList.add("open");
   document.body.classList.add("modal-open");
-  document.body.style.overflow = "hidden";
+  document.body.classList.remove("modal-close");
 }
 
 function closeModalWindow() {
   elements.modal.classList.remove("open");
   document.body.classList.remove("modal-open");
-  document.body.style.overflow = "auto";
+  document.body.classList.add("modal-close");
 }
 
 elements.closeModal.addEventListener("click", closeModalWindow);
