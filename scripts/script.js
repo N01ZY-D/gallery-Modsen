@@ -3,16 +3,19 @@ import { formSelectorsId } from "../helpers/selectors.js";
 import UNSPLASH_ACCESS_KEY from "./apikey.js";
 
 const accessKey = UNSPLASH_ACCESS_KEY;
-const gallery = document.querySelector(".gallery");
-const searchInput = document.querySelector("#searchInput");
-const searchButton = document.querySelector("#searchButton");
-const modal = document.querySelector(".modal");
-const modalImg = document.querySelector(".modal img");
-const closeModal = document.querySelector(".close-modal");
-const prevBtn = document.querySelector(".prev");
-const nextBtn = document.querySelector(".next");
+const elements = {
+  gallery: document.querySelector(".gallery"),
+  searchInput: document.querySelector("#searchInput"),
+  searchButton: document.querySelector("#searchButton"),
+  modal: document.querySelector(".modal"),
+  modalImg: document.querySelector(".modal img"),
+  closeModal: document.querySelector(".close-modal"),
+  prevBtn: document.querySelector(".prev"),
+  nextBtn: document.querySelector(".next"),
+};
 
 let images = [];
+const imageCache = {};
 let currentIndex = 0;
 
 function loadCommonComponents() {
@@ -37,87 +40,133 @@ function loadCommonComponents() {
   ]);
 }
 
-// Получение изображений из Unsplash API
-async function fetchImages() {
+async function fetchImages(query = "random") {
   try {
-    const response = await fetch(
-      `https://api.unsplash.com/photos/?client_id=${accessKey}&per_page=20`
-    );
-    images = await response.json();
+    Object.keys(imageCache).forEach((key) => delete imageCache[key]);
+
+    const endpoint =
+      query === "random"
+        ? `https://api.unsplash.com/photos/random?count=12&client_id=${accessKey}`
+        : `https://api.unsplash.com/search/photos?query=${query}&client_id=${accessKey}&per_page=12`;
+
+    const response = await fetch(endpoint);
+    const data = await response.json();
+    images = query === "random" ? data : data.results;
     displayImages(images);
   } catch (error) {
     console.error("Ошибка загрузки изображений", error);
   }
 }
 
-// Отображение изображений в галерее
+function preloadImages() {
+  images.forEach((image, index) => {
+    if (!imageCache[index]) {
+      // Если изображения ещё нет в кэше
+      const img = new Image();
+      img.src = image.urls.regular;
+      img.onload = () => {
+        imageCache[index] = img; // Сохраняем загруженное изображение
+      };
+    }
+  });
+}
+
 function displayImages(images) {
-  gallery.innerHTML = "";
+  elements.gallery.innerHTML = "";
+
   images.forEach((image, index) => {
     const imgElement = document.createElement("img");
     imgElement.src = image.urls.small;
     imgElement.alt = image.alt_description || "Image";
     imgElement.dataset.index = index;
-    gallery.appendChild(imgElement);
+    imgElement.classList.add("gallery-item");
+    elements.gallery.appendChild(imgElement);
   });
+
+  preloadImages();
 }
 
-// Делегирование событий: обработка кликов по изображениям галереи
-gallery.addEventListener("click", (event) => {
+elements.gallery.addEventListener("click", (event) => {
   const imgElement = event.target;
   if (imgElement.tagName === "IMG") {
     openModal(parseInt(imgElement.dataset.index, 10));
   }
 });
 
-// Фильтрация изображений по поиску
-searchButton.addEventListener("click", () => {
-  const query = searchInput.value.toLowerCase();
-  const filteredImages = images.filter(
-    (img) =>
-      img.alt_description && img.alt_description.toLowerCase().includes(query)
-  );
-  displayImages(filteredImages);
+function validateInput(input) {
+  const regex = /^[a-zA-Z0-9!$&*=^|~#%'+/{}?_ ]{3,50}$/;
+
+  if (!regex.test(input)) {
+    alert(
+      "Ввод должен содержать от 3 до 50 символов и только разрешенные символы."
+    );
+    return false;
+  }
+
+  return true;
+}
+
+elements.searchButton.addEventListener("click", () => {
+  const query = elements.searchInput.value.trim();
+  if (query && validateInput(query)) {
+    fetchImages(query);
+  }
 });
 
-// Открытие модального окна
+elements.searchInput.addEventListener("keydown", (event) => {
+  if (event.key === "Enter") {
+    const query = elements.searchInput.value.trim();
+    if (query && validateInput(query)) {
+      fetchImages(query);
+    }
+  }
+});
+
 function openModal(index) {
   currentIndex = index;
   updateModalImage();
-  modal.classList.add("open");
+  elements.modal.classList.add("open");
+  document.body.classList.add("modal-open");
   document.body.style.overflow = "hidden";
 }
 
-// Закрытие модального окна
-closeModal.addEventListener("click", closeModalWindow);
-modal.addEventListener("click", (e) => {
-  if (e.target === modal) closeModalWindow();
-});
 function closeModalWindow() {
-  modal.classList.remove("open");
+  elements.modal.classList.remove("open");
+  document.body.classList.remove("modal-open");
   document.body.style.overflow = "auto";
 }
 
-// Обновление изображения в модальном окне
+elements.closeModal.addEventListener("click", closeModalWindow);
+elements.modal.addEventListener("click", (e) => {
+  if (e.target === elements.modal) closeModalWindow();
+});
+
 function updateModalImage() {
-  modalImg.src = images[currentIndex].urls.regular;
+  if (imageCache[currentIndex]) {
+    elements.modalImg.src = imageCache[currentIndex].src;
+  } else {
+    const img = new Image();
+    img.src = images[currentIndex].urls.regular;
+    img.onload = () => {
+      imageCache[currentIndex] = img;
+      elements.modalImg.src = img.src;
+    };
+  }
 }
 
-// Пролистывание карусели
-prevBtn.addEventListener("click", () => {
+elements.prevBtn.addEventListener("click", () => {
   currentIndex = (currentIndex - 1 + images.length) % images.length;
   updateModalImage();
 });
-nextBtn.addEventListener("click", () => {
+elements.nextBtn.addEventListener("click", () => {
   currentIndex = (currentIndex + 1) % images.length;
   updateModalImage();
 });
 
-// Обработка стрелок клавиатуры
 document.addEventListener("keydown", (e) => {
-  if (modal.classList.contains("open")) {
-    if (e.key === "ArrowLeft") prevBtn.click();
-    if (e.key === "ArrowRight") nextBtn.click();
+  if (elements.modal.classList.contains("open")) {
+    if (e.key === "ArrowLeft") elements.prevBtn.click();
+    if (e.key === "ArrowRight") elements.nextBtn.click();
     if (e.key === "Escape") closeModalWindow();
   }
 });
