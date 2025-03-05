@@ -1,4 +1,4 @@
-# Tестовое задание Registration form
+# Tестовое задание Gallery
 
 ## Содержание
 
