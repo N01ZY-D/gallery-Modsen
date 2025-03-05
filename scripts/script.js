@@ -94,7 +94,7 @@ elements.gallery.addEventListener("click", (event) => {
 });
 
 function validateInput(input) {
-  const regex = /^[a-zA-Z0-9!$&*=^|~#%'+/{}?_ ]{3,50}$/;
+  const regex = /^[a-zA-Zа-яА-Я0-9!$&*=^|~#%'+/{}?_ ]{3,50}$/;
 
   if (!regex.test(input)) {
     alert(
@@ -108,7 +108,7 @@ function validateInput(input) {
 
 elements.searchButton.addEventListener("click", () => {
   const query = elements.searchInput.value.trim();
-  if (query && validateInput(query)) {
+  if (validateInput(query) && query) {
     fetchImages(query);
   }
 });
@@ -116,7 +116,7 @@ elements.searchButton.addEventListener("click", () => {
 elements.searchInput.addEventListener("keydown", (event) => {
   if (event.key === "Enter") {
     const query = elements.searchInput.value.trim();
-    if (query && validateInput(query)) {
+    if (validateInput(query) && query) {
       fetchImages(query);
     }
   }
