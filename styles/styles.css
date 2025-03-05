@@ -363,6 +363,7 @@ body.modal-open .gallery {
   align-items: center;
   justify-content: center;
   transition: background 0.3s ease-in-out;
+  z-index: 10;
 }
 
 .prev:hover,
