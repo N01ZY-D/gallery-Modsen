@@ -61,11 +61,10 @@ async function fetchImages(query = "random") {
 function preloadImages() {
   images.forEach((image, index) => {
     if (!imageCache[index]) {
-      // Если изображения ещё нет в кэше
       const img = new Image();
       img.src = image.urls.regular;
       img.onload = () => {
-        imageCache[index] = img; // Сохраняем загруженное изображение
+        imageCache[index] = img;
       };
     }
   });
@@ -94,7 +93,7 @@ elements.gallery.addEventListener("click", (event) => {
 });
 
 function validateInput(input) {
-  const regex = /^[a-zA-Z0-9!$&*=^|~#%'+/{}?_ ]{3,50}$/;
+  const regex = /^[a-zA-Zа-яА-Я0-9!$&*=^|~#%'+/{}?_ ]{3,50}$/;
 
   if (!regex.test(input)) {
     alert(
@@ -108,7 +107,7 @@ function validateInput(input) {
 
 elements.searchButton.addEventListener("click", () => {
   const query = elements.searchInput.value.trim();
-  if (query && validateInput(query)) {
+  if (validateInput(query) && query) {
     fetchImages(query);
   }
 });
@@ -116,7 +115,7 @@ elements.searchButton.addEventListener("click", () => {
 elements.searchInput.addEventListener("keydown", (event) => {
   if (event.key === "Enter") {
     const query = elements.searchInput.value.trim();
-    if (query && validateInput(query)) {
+    if (validateInput(query) && query) {
       fetchImages(query);
     }
   }
@@ -127,13 +126,13 @@ function openModal(index) {
   updateModalImage();
   elements.modal.classList.add("open");
   document.body.classList.add("modal-open");
-  document.body.style.overflow = "hidden";
+  document.body.classList.remove("modal-close");
 }
 
 function closeModalWindow() {
   elements.modal.classList.remove("open");
   document.body.classList.remove("modal-open");
-  document.body.style.overflow = "auto";
+  document.body.classList.add("modal-close");
 }
 
 elements.closeModal.addEventListener("click", closeModalWindow);
