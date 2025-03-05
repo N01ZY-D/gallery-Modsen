@@ -70,7 +70,6 @@ function preloadImages() {
   });
 }
 
-// Отображение изображений в галерее 3x4
 function displayImages(images) {
   gallery.innerHTML = "";
 
@@ -97,7 +96,18 @@ gallery.addEventListener("click", (event) => {
 // Запрос изображений по поисковому запросу
 searchButton.addEventListener("click", () => {
   const query = searchInput.value.trim();
-  fetchImages(query);
+  if (query) {
+    fetchImages(query);
+  }
+});
+
+searchInput.addEventListener("keydown", (event) => {
+  if (event.key === "Enter") {
+    const query = searchInput.value.trim();
+    if (query) {
+      fetchImages(query);
+    }
+  }
 });
 
 // Открытие модального окна
@@ -109,27 +119,27 @@ function openModal(index) {
   document.body.style.overflow = "hidden";
 }
 
-// Закрытие модального окна
-closeModal.addEventListener("click", closeModalWindow);
-modal.addEventListener("click", (e) => {
-  if (e.target === modal) closeModalWindow();
-});
 function closeModalWindow() {
   modal.classList.remove("open");
   document.body.classList.remove("modal-open");
   document.body.style.overflow = "auto";
 }
 
-// Обновление изображения в модальном окне
+// Закрытие модального окна
+closeModal.addEventListener("click", closeModalWindow);
+modal.addEventListener("click", (e) => {
+  if (e.target === modal) closeModalWindow();
+});
+
 function updateModalImage() {
   if (imageCache[currentIndex]) {
-    modalImg.src = imageCache[currentIndex].src;
+    elements.modalImg.src = imageCache[currentIndex].src;
   } else {
     const img = new Image();
-    img.src = images[currentIndex].urls.full;
+    img.src = images[currentIndex].urls.regular;
     img.onload = () => {
-      imageCache[currentIndex] = img; // Кэшируем после загрузки
-      modalImg.src = img.src;
+      imageCache[currentIndex] = img;
+      elements.modalImg.src = img.src;
     };
   }
 }
@@ -154,4 +164,4 @@ document.addEventListener("keydown", (e) => {
 });
 
 loadCommonComponents();
-//fetchImages();
+fetchImages();

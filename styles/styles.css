@@ -117,11 +117,11 @@ main {
 
 .search-container {
   display: flex;
+  flex-direction: column;
   margin: auto;
   margin-top: 72px;
   margin-bottom: 83px;
   max-width: 762px;
-  flex-direction: column;
   gap: 81px;
 }
 
@@ -140,7 +140,10 @@ main {
 
 .input-container {
   position: relative;
-  width: 100%;
+  display: flex;
+  align-items: center;
+  margin-left: 5px;
+  margin-right: 5px;
 }
 
 #searchInput {
@@ -217,7 +220,7 @@ footer .license {
   margin-top: var(--gap-68);
   margin-bottom: var(--gap-0);
   padding-bottom: var(--gap-30);
-  padding-left: var(--gap-135);
+  padding-left: var(--gap-40);
 }
 
 .footer-info {
@@ -237,7 +240,6 @@ footer .license {
   color: var(--text-color-grey);
   font-size: var(--font-size-20);
   line-height: var(--line-height-19);
-  margin-right: auto;
   transition: color 0.1s ease;
 }
 
@@ -262,6 +264,7 @@ footer .license {
 
 .company-links p {
   margin: 0;
+  text-align: left;
 }
 
 .social-links {
@@ -329,15 +332,18 @@ body.modal-open .gallery {
   max-width: 90vw;
   max-height: 90vh;
   border-radius: 5px;
+  position: relative;
 }
 
 .close-modal {
   position: absolute;
-  top: 15px;
-  right: 20px;
+  top: 10px;
+  right: 10px;
   font-size: 30px;
   color: white;
   cursor: pointer;
+  background: none;
+  border: none;
 }
 
 .prev,
@@ -345,11 +351,23 @@ body.modal-open .gallery {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  font-size: 30px;
+  font-size: 24px;
   color: white;
   cursor: pointer;
-  background: none;
+  background: var(--primary-color);
   border: none;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.3s ease-in-out;
+}
+
+.prev:hover,
+.next:hover {
+  background: var(--secondary-color);
 }
 
 .prev {
@@ -367,7 +385,6 @@ body.modal-open .gallery {
   }
 
   nav {
-    display: none;
     justify-content: space-around;
   }
 
@@ -385,7 +402,6 @@ body.modal-open .gallery {
 
   .company-links {
     flex-direction: column;
-    gap: unset;
   }
 
   .footer-info > div:first-child {
@@ -405,6 +421,14 @@ body.modal-open .gallery {
     padding-left: var(--gap-0);
     text-align: center;
   }
+
+  .gallery {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .gallery-item {
+    width: 100%;
+  }
 }
 
 @media (max-width: 580px) {
@@ -416,13 +440,40 @@ body.modal-open .gallery {
 }
 
 @media (max-width: 500px) {
+  header {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+
+  .logo img {
+    max-width: 200px;
+  }
+
+  .gallery {
+    grid-template-columns: 1fr;
+  }
+
   .company-links {
     flex-direction: column;
-    gap: var(--gap-10);
+    gap: var(--gap-25);
   }
 }
 
 @media (max-width: 400px) {
+  .search-container {
+    gap: 45px;
+    margin-bottom: var(--gap-35);
+  }
+
+  .search-container p {
+    font-size: var(--font-size-24);
+    line-height: var(--line-height-28);
+  }
+
+  #searchInput::placeholder {
+    font-size: var(--font-size-12);
+  }
+
   .footer-list-head {
     margin-bottom: var(--gap-0);
   }
